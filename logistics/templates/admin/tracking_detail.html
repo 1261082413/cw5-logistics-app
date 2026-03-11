@@ -1,0 +1,22 @@
+{% extends "admin/admin_base.html" %}
+{% block admin_content %}
+<h3 class="fw-bold mb-3">Tracking Details</h3>
+
+<div class="p-3 border rounded-3 mb-3">
+  <div class="fw-semibold">Shipment ID: {{ order.id|stringformat:"03d" }}</div>
+  <div>Destination: {{ order.destination }}</div>
+  <div>Depart from: {{ order.depart_from|default:order.address }}</div>
+</div>
+
+<div class="p-3 border rounded-3">
+  <div class="fw-semibold mb-1">Tracking details / status:</div>
+  <div>{{ order.get_status_display }}</div>
+  {% if order.description %}
+    <div class="text-muted small mt-2">{{ order.description }}</div>
+  {% endif %}
+</div>
+
+<div class="mt-4">
+  <a class="btn btn-outline-secondary" href="{% url 'admin_ship_management' %}">Back to list</a>
+</div>
+{% endblock %}

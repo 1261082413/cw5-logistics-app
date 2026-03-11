@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <!-- Sidebar -->
+  <div class="col-12 col-md-3 col-lg-3">
+    <div class="auth-card bg-white p-3">
+      <div class="fw-bold mb-2">Admin Panel</div>
+      <div class="text-muted small mb-3">{{ user.username }}</div>
+
+      <div class="d-grid gap-2">
+        <a class="btn btn-outline-primary" href="{% url 'admin_user_management' %}">
+          User Management
+        </a>
+        <a class="btn btn-outline-primary" href="{% url 'admin_ship_management' %}">
+          Ship Management
+        </a>
+        <a class="btn btn-outline-secondary" href="{% url 'admin_dashboard' %}">
+          Back
+        </a>
+      </div>
+
+      <hr class="my-3">
+      <a class="btn btn-warning w-100" href="{% url 'logout' %}">Log out</a>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="col-12 col-md-9 col-lg-9">
+    <div class="auth-card bg-white p-4">
+      {% block admin_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

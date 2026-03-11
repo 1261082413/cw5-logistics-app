@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-10 col-lg-8">
+    <div class="auth-card bg-white p-4 p-md-5">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+          <h1 class="fw-bold mb-2">Welcome 👋</h1>
+          <p class="help-text mb-0">
+            Sign in as <span class="badge-role">Customer</span> or <span class="badge-role">Admin</span>
+            to manage orders and shipments.
+          </p>
+        </div>
+        <div class="text-end">
+          <div class="small text-muted">CW5 Web App</div>
+          <div class="fw-semibold">Login / Register</div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <div class="d-grid gap-3 d-sm-flex">
+        <a class="btn btn-dark btn-lg flex-fill" href="{% url 'login' %}">
+          Login
+        </a>
+        <a class="btn btn-primary btn-lg flex-fill" href="{% url 'signup' %}">
+          Register
+        </a>
+      </div>
+
+      <div class="mt-4 small text-muted">
+        
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
