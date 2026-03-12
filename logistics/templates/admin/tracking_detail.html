@@ -1,22 +1,176 @@
 {% extends "admin/admin_base.html" %}
+
 {% block admin_content %}
-<h3 class="fw-bold mb-3">Tracking Details</h3>
 
-<div class="p-3 border rounded-3 mb-3">
-  <div class="fw-semibold">Shipment ID: {{ order.id|stringformat:"03d" }}</div>
-  <div>Destination: {{ order.destination }}</div>
-  <div>Depart from: {{ order.depart_from|default:order.address }}</div>
+<h2 class="page-title">Tracking Details</h2>
+
+<div class="content-card mb-4">
+
+  <div class="info-item">
+    <div class="info-label">Shipment ID</div>
+    <div class="info-value">#{{ order.id }}</div>
+  </div>
+
+  <div class="info-item">
+    <div class="info-label">Customer</div>
+    <div class="info-value">{{ order.customer.username }}</div>
+  </div>
+
+  <div class="info-item">
+    <div class="info-label">Destination</div>
+    <div class="info-value">{{ order.destination }}</div>
+  </div>
+
+  <div class="info-item">
+    <div class="info-label">Depart from</div>
+    <div class="info-value">{{ order.depart_from|default:order.address }}</div>
+  </div>
+
+  <div class="info-item">
+    <div class="info-label">Status</div>
+    <div class="info-value">{{ order.get_status_display }}</div>
+  </div>
+
 </div>
 
-<div class="p-3 border rounded-3">
-  <div class="fw-semibold mb-1">Tracking details / status:</div>
-  <div>{{ order.get_status_display }}</div>
-  {% if order.description %}
-    <div class="text-muted small mt-2">{{ order.description }}</div>
-  {% endif %}
+
+<div class="content-card mb-4">
+
+  <div class="section-title">Tracking timeline</div>
+
+  {% for step in timeline %}
+  <div class="timeline-item">
+
+    <div class="timeline-left">
+
+      {% if step.state == "done" %}
+        <span class="badge text-bg-success">Done</span>
+      {% elif step.state == "current" %}
+        <span class="badge text-bg-primary">Current</span>
+      {% else %}
+        <span class="badge text-bg-secondary">Pending</span>
+      {% endif %}
+
+      <span>{{ step.label }}</span>
+
+    </div>
+
+    <div>
+
+      {% if order.status == "pending" and step.code == "picked_up" %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next_status" value="picked_up">
+        <button class="btn btn-sm btn-outline-primary">Mark complete</button>
+      </form>
+      {% endif %}
+
+      {% if order.status == "picked_up" and step.code == "in_transit" %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next_status" value="in_transit">
+        <button class="btn btn-sm btn-outline-primary">Mark complete</button>
+      </form>
+      {% endif %}
+
+      {% if order.status == "in_transit" and step.code == "out_for_delivery" %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next_status" value="out_for_delivery">
+        <button class="btn btn-sm btn-outline-primary">Mark complete</button>
+      </form>
+      {% endif %}
+
+      {% if order.status == "out_for_delivery" and step.code == "delivered" %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next_status" value="delivered">
+        <button class="btn btn-sm btn-success">Mark complete</button>
+      </form>
+      {% endif %}
+
+    </div>
+
+  </div>
+  {% endfor %}
+
 </div>
+
+
+<div class="content-card">
+
+  <div class="section-title">Tracking Map</div>
+
+  <div class="timeline-map">
+    <div id="map" style="height:420px"></div>
+  </div>
+
+</div>
+
 
 <div class="mt-4">
-  <a class="btn btn-outline-secondary" href="{% url 'admin_ship_management' %}">Back to list</a>
+  <a class="btn btn-outline-secondary" href="{% url 'admin_ship_management' %}">
+    Back to shipment list
+  </a>
 </div>
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+const startLat = {{ order.start_lat|default:"null" }};
+const startLng = {{ order.start_lng|default:"null" }};
+const destLat = {{ order.dest_lat|default:"null" }};
+const destLng = {{ order.dest_lng|default:"null" }};
+const currentLat = {{ order.current_lat|default:"null" }};
+const currentLng = {{ order.current_lng|default:"null" }};
+
+if (
+  startLat !== null &&
+  startLng !== null &&
+  destLat !== null &&
+  destLng !== null &&
+  currentLat !== null &&
+  currentLng !== null
+) {
+
+  const map = L.map("map");
+
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      attribution: "&copy; OpenStreetMap contributors"
+    }
+  ).addTo(map);
+
+  const startPoint = [startLat, startLng];
+  const currentPoint = [currentLat, currentLng];
+  const destPoint = [destLat, destLng];
+
+  L.marker(startPoint)
+    .addTo(map)
+    .bindPopup("Start: {{ order.depart_from|escapejs }}");
+
+  L.marker(currentPoint)
+    .addTo(map)
+    .bindPopup("Current parcel location");
+
+  L.marker(destPoint)
+    .addTo(map)
+    .bindPopup("Destination: {{ order.destination|escapejs }}");
+
+  const routeLine = L.polyline(
+    [startPoint, currentPoint, destPoint],
+    { weight: 4 }
+  ).addTo(map);
+
+  map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+
+}
+
+</script>
+
 {% endblock %}

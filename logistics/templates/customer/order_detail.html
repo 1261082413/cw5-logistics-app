@@ -1,36 +1,214 @@
 {% extends "customer/customer_base.html" %}
 
 {% block customer_content %}
-<h3 class="fw-bold mb-3">Order #{{ order.id }} details</h3>
 
-<div class="row g-3">
-  <div class="col-md-6">
-    <div class="p-3 border rounded-3">
-      <div class="text-muted small">Status</div>
-      <div class="fw-semibold">{{ order.get_status_display }}</div>
+<div class="hero-panel mb-4">
+  <div class="soft-chip mb-3">Live Tracking</div>
+  <h2 class="page-title mb-2">Track your shipment</h2>
+  <p class="text-muted mb-0">
+    Review the current parcel status, delivery progress, and latest shipment location.
+  </p>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card h-100">
+      <div class="stat-label">Order ID</div>
+      <div class="stat-value" style="font-size: 1.6rem;">#{{ order.id }}</div>
     </div>
   </div>
-  <div class="col-md-6">
-    <div class="p-3 border rounded-3">
-      <div class="text-muted small">Weight</div>
-      <div class="fw-semibold">{{ order.weight }} kg</div>
+
+  <div class="col-md-4">
+    <div class="stat-card h-100">
+      <div class="stat-label">Current status</div>
+      <div class="stat-value" style="font-size: 1.4rem;">{{ order.get_status_display }}</div>
     </div>
   </div>
-  <div class="col-12">
-    <div class="p-3 border rounded-3">
-      <div class="text-muted small">Address → Destination</div>
-      <div class="fw-semibold">{{ order.address }} → {{ order.destination }}</div>
-    </div>
-  </div>
-  <div class="col-12">
-    <div class="p-3 border rounded-3">
-      <div class="text-muted small">Description</div>
-      <div>{{ order.description|default:"(No description)" }}</div>
+
+  <div class="col-md-4">
+    <div class="stat-card h-100">
+      <div class="stat-label">Estimated delivery</div>
+      <div class="stat-value" style="font-size: 1.1rem;">
+        {% if order.estimated_delivery %}
+          {{ order.estimated_delivery|date:"Y-m-d H:i" }}
+        {% else %}
+          Not available
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>
 
-<div class="mt-4">
-  <a class="btn btn-outline-secondary" href="{% url 'customer_order_history' %}">Back to history</a>
+<div class="content-card mb-4">
+  <div class="section-title">Shipment summary</div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="info-item">
+        <div class="info-label">From</div>
+        <div class="info-value">{{ order.depart_from|default:order.address }}</div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="info-item">
+        <div class="info-label">Destination</div>
+        <div class="info-value">{{ order.destination }}</div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="info-item">
+        <div class="info-label">Weight</div>
+        <div class="info-value">{{ order.weight }} kg</div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="info-item">
+        <div class="info-label">Parcel note</div>
+        <div class="info-value">{{ order.description|default:"No description" }}</div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="info-item">
+        <div class="info-label">Latest tracking update</div>
+        <div class="info-value">{{ order.tracking_note|default:"No tracking note yet." }}</div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<div class="content-card mb-4">
+  <div class="section-title mb-3">Delivery progress</div>
+
+  <div class="row g-3">
+    {% for step in timeline %}
+      <div class="col-md-6 col-xl-4">
+        <div class="timeline-item h-100">
+          <div class="timeline-left">
+            {% if step.state == "done" %}
+              <span class="badge text-bg-success">Completed</span>
+            {% elif step.state == "current" %}
+              <span class="badge text-bg-primary">In progress</span>
+            {% else %}
+              <span class="badge text-bg-secondary">Waiting</span>
+            {% endif %}
+            <span>{{ step.label }}</span>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="content-card mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div class="section-title mb-0">Shipment map</div>
+    <div class="soft-chip">Current parcel location</div>
+  </div>
+
+  <div class="timeline-map">
+    <div id="map" style="height: 420px;"></div>
+  </div>
+</div>
+
+<div class="content-card mb-4">
+  <div class="section-title">Tracking explanation</div>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="p-3 border rounded-3 h-100">
+        <div class="info-label">Start point</div>
+        <div class="info-value">{{ order.depart_from|default:order.address }}</div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="p-3 border rounded-3 h-100">
+        <div class="info-label">Current parcel point</div>
+        <div class="info-value">
+          {% if order.current_lat and order.current_lng %}
+            {{ order.current_lat }}, {{ order.current_lng }}
+          {% else %}
+            Not available
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="p-3 border rounded-3 h-100">
+        <div class="info-label">Destination point</div>
+        <div class="info-value">{{ order.destination }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mt-4 d-flex gap-2 flex-wrap">
+  <a class="btn btn-outline-secondary" href="{% url 'customer_order_history' %}">
+    Back to history
+  </a>
+  <a class="btn btn-outline-primary" href="{% url 'customer_dashboard' %}">
+    Back to dashboard
+  </a>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  const startLat = {{ order.start_lat|default:"null" }};
+  const startLng = {{ order.start_lng|default:"null" }};
+  const destLat = {{ order.dest_lat|default:"null" }};
+  const destLng = {{ order.dest_lng|default:"null" }};
+  const currentLat = {{ order.current_lat|default:"null" }};
+  const currentLng = {{ order.current_lng|default:"null" }};
+
+  const mapContainer = document.getElementById("map");
+
+  if (
+    startLat !== null &&
+    startLng !== null &&
+    destLat !== null &&
+    destLng !== null &&
+    currentLat !== null &&
+    currentLng !== null
+  ) {
+    const map = L.map("map");
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    const startPoint = [startLat, startLng];
+    const currentPoint = [currentLat, currentLng];
+    const destPoint = [destLat, destLng];
+
+    L.marker(startPoint)
+      .addTo(map)
+      .bindPopup("Start: {{ order.depart_from|escapejs }}");
+
+    L.marker(currentPoint)
+      .addTo(map)
+      .bindPopup("Current parcel location");
+
+    L.marker(destPoint)
+      .addTo(map)
+      .bindPopup("Destination: {{ order.destination|escapejs }}");
+
+    const routeLine = L.polyline(
+      [startPoint, currentPoint, destPoint],
+      { weight: 5 }
+    ).addTo(map);
+
+    map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+  } else {
+    mapContainer.innerHTML =
+      "<div class='text-muted p-4'>Map data is not available for this order.</div>";
+  }
+</script>
+
 {% endblock %}

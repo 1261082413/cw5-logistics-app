@@ -1,39 +1,84 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+{% load static %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-12 col-md-10 col-lg-8">
-    <div class="auth-card bg-white p-4 p-md-5">
-      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-        <div>
-          <h1 class="fw-bold mb-2">Welcome 👋</h1>
-          <p class="help-text mb-0">
-            Sign in as <span class="badge-role">Customer</span> or <span class="badge-role">Admin</span>
-            to manage orders and shipments.
-          </p>
+<div class="container py-5">
+  <div class="row align-items-center g-5 home-hero-layout"
+       style="background: linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.45)),
+              url('{% static "logistics/images/Homepage.png" %}') center center / cover no-repeat;">
+
+    <div class="col-lg-7">
+      <div class="home-left-panel">
+        <div class="soft-chip mb-3">Smart Logistics Platform</div>
+
+        <h1 class="home-main-title mb-4">
+          Ship, track, and manage deliveries with confidence.
+        </h1>
+
+        <p class="home-subtext mb-4">
+          A simple and modern logistics platform for creating orders,
+          tracking parcels, and managing delivery progress in real time.
+        </p>
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <span class="soft-chip">Real-time tracking</span>
+          <span class="soft-chip">Secure access</span>
         </div>
-        <div class="text-end">
-          <div class="small text-muted">CW5 Web App</div>
-          <div class="fw-semibold">Login / Register</div>
+
+        <div class="row g-3 mt-2">
+          <div class="col-md-4">
+            <div class="home-feature-card h-100">
+              <div class="card-title-strong">Track parcels</div>
+              <p class="text-muted mb-0">
+                Monitor shipment progress with clear delivery updates.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="home-feature-card h-100">
+              <div class="card-title-strong">Manage orders</div>
+              <p class="text-muted mb-0">
+                Create orders, review history, and check shipment details.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="home-feature-card h-100">
+              <div class="card-title-strong">Role-based system</div>
+              <p class="text-muted mb-0">
+                Separate customer and admin access for smoother control.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <hr class="my-4">
-
-      <div class="d-grid gap-3 d-sm-flex">
-        <a class="btn btn-dark btn-lg flex-fill" href="{% url 'login' %}">
-          Login
-        </a>
-        <a class="btn btn-primary btn-lg flex-fill" href="{% url 'signup' %}">
-          Register
-        </a>
-      </div>
-
-      <div class="mt-4 small text-muted">
-        
       </div>
     </div>
+
+    <div class="col-lg-5">
+      <div class="home-login-card">
+        <div class="soft-chip mb-3">Welcome</div>
+
+        <h2 class="fw-bold mb-3">Access your account</h2>
+
+        <p class="text-muted mb-4">
+          Sign in as a customer to place and track orders, or as an admin to manage shipments and delivery updates.
+        </p>
+
+        <div class="d-grid gap-3">
+          <a href="{% url 'login' %}" class="btn btn-dark btn-lg">Login</a>
+          <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">Register</a>
+        </div>
+
+        <hr class="divider-soft">
+
+        <div class="small text-muted">
+          Built for shipment visibility, order control, and a better delivery experience.
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}
